@@ -11,10 +11,17 @@
 #define INODE_MAGIC 0x494e4f44
 
 /* On-disk inode.
+<<<<<<< HEAD:src/filesys/inode.c
    Must be exactly DISK_SECTOR_SIZE bytes long. */
 struct inode_disk
   {
     disk_sector_t start;                /* First data sector. */
+=======
+   Must be exactly BLOCK_SECTOR_SIZE bytes long. */
+struct inode_disk
+  {
+    block_sector_t start;               /* First data sector. */
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
     off_t length;                       /* File size in bytes. */
     unsigned magic;                     /* Magic number. */
     uint32_t unused[125];               /* Not used. */
@@ -25,30 +32,50 @@ struct inode_disk
 static inline size_t
 bytes_to_sectors (off_t size)
 {
+<<<<<<< HEAD:src/filesys/inode.c
   return DIV_ROUND_UP (size, DISK_SECTOR_SIZE);
+=======
+  return DIV_ROUND_UP (size, BLOCK_SECTOR_SIZE);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
 }
 
 /* In-memory inode. */
 struct inode 
   {
     struct list_elem elem;              /* Element in inode list. */
+<<<<<<< HEAD:src/filesys/inode.c
     disk_sector_t sector;               /* Sector number of disk location. */
+=======
+    block_sector_t sector;              /* Sector number of disk location. */
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
     int open_cnt;                       /* Number of openers. */
     bool removed;                       /* True if deleted, false otherwise. */
     int deny_write_cnt;                 /* 0: writes ok, >0: deny writes. */
     struct inode_disk data;             /* Inode content. */
   };
 
+<<<<<<< HEAD:src/filesys/inode.c
 /* Returns the disk sector that contains byte offset POS within
    INODE.
    Returns -1 if INODE does not contain data for a byte at offset
    POS. */
 static disk_sector_t
+=======
+/* Returns the block device sector that contains byte offset POS
+   within INODE.
+   Returns -1 if INODE does not contain data for a byte at offset
+   POS. */
+static block_sector_t
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
 byte_to_sector (const struct inode *inode, off_t pos) 
 {
   ASSERT (inode != NULL);
   if (pos < inode->data.length)
+<<<<<<< HEAD:src/filesys/inode.c
     return inode->data.start + pos / DISK_SECTOR_SIZE;
+=======
+    return inode->data.start + pos / BLOCK_SECTOR_SIZE;
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
   else
     return -1;
 }
@@ -66,11 +93,19 @@ inode_init (void)
 
 /* Initializes an inode with LENGTH bytes of data and
    writes the new inode to sector SECTOR on the file system
+<<<<<<< HEAD:src/filesys/inode.c
    disk.
    Returns true if successful.
    Returns false if memory or disk allocation fails. */
 bool
 inode_create (disk_sector_t sector, off_t length)
+=======
+   device.
+   Returns true if successful.
+   Returns false if memory or disk allocation fails. */
+bool
+inode_create (block_sector_t sector, off_t length)
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
 {
   struct inode_disk *disk_inode = NULL;
   bool success = false;
@@ -79,7 +114,11 @@ inode_create (disk_sector_t sector, off_t length)
 
   /* If this assertion fails, the inode structure is not exactly
      one sector in size, and you should fix that. */
+<<<<<<< HEAD:src/filesys/inode.c
   ASSERT (sizeof *disk_inode == DISK_SECTOR_SIZE);
+=======
+  ASSERT (sizeof *disk_inode == BLOCK_SECTOR_SIZE);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
 
   disk_inode = calloc (1, sizeof *disk_inode);
   if (disk_inode != NULL)
@@ -87,6 +126,7 @@ inode_create (disk_sector_t sector, off_t length)
       size_t sectors = bytes_to_sectors (length);
       disk_inode->length = length;
       disk_inode->magic = INODE_MAGIC;
+<<<<<<< HEAD:src/filesys/inode.c
       if (free_map_allocate (sectors, &disk_inode->start))
         {
           disk_write (filesys_disk, sector, disk_inode);
@@ -97,6 +137,18 @@ inode_create (disk_sector_t sector, off_t length)
               
               for (i = 0; i < sectors; i++) 
                 disk_write (filesys_disk, disk_inode->start + i, zeros); 
+=======
+      if (free_map_allocate (sectors, &disk_inode->start)) 
+        {
+          block_write (fs_device, sector, disk_inode);
+          if (sectors > 0) 
+            {
+              static char zeros[BLOCK_SECTOR_SIZE];
+              size_t i;
+              
+              for (i = 0; i < sectors; i++) 
+                block_write (fs_device, disk_inode->start + i, zeros);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
             }
           success = true; 
         } 
@@ -109,7 +161,11 @@ inode_create (disk_sector_t sector, off_t length)
    and returns a `struct inode' that contains it.
    Returns a null pointer if memory allocation fails. */
 struct inode *
+<<<<<<< HEAD:src/filesys/inode.c
 inode_open (disk_sector_t sector) 
+=======
+inode_open (block_sector_t sector)
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
 {
   struct list_elem *e;
   struct inode *inode;
@@ -137,7 +193,11 @@ inode_open (disk_sector_t sector)
   inode->open_cnt = 1;
   inode->deny_write_cnt = 0;
   inode->removed = false;
+<<<<<<< HEAD:src/filesys/inode.c
   disk_read (filesys_disk, inode->sector, &inode->data);
+=======
+  block_read (fs_device, inode->sector, &inode->data);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
   return inode;
 }
 
@@ -151,7 +211,11 @@ inode_reopen (struct inode *inode)
 }
 
 /* Returns INODE's inode number. */
+<<<<<<< HEAD:src/filesys/inode.c
 disk_sector_t
+=======
+block_sector_t
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
 inode_get_inumber (const struct inode *inode)
 {
   return inode->sector;
@@ -207,12 +271,21 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
   while (size > 0) 
     {
       /* Disk sector to read, starting byte offset within sector. */
+<<<<<<< HEAD:src/filesys/inode.c
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
       off_t inode_left = inode_length (inode) - offset;
       int sector_left = DISK_SECTOR_SIZE - sector_ofs;
+=======
+      block_sector_t sector_idx = byte_to_sector (inode, offset);
+      int sector_ofs = offset % BLOCK_SECTOR_SIZE;
+
+      /* Bytes left in inode, bytes left in sector, lesser of the two. */
+      off_t inode_left = inode_length (inode) - offset;
+      int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
       int min_left = inode_left < sector_left ? inode_left : sector_left;
 
       /* Number of bytes to actually copy out of this sector. */
@@ -220,10 +293,17 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       if (chunk_size <= 0)
         break;
 
+<<<<<<< HEAD:src/filesys/inode.c
       if (sector_ofs == 0 && chunk_size == DISK_SECTOR_SIZE) 
         {
           /* Read full sector directly into caller's buffer. */
           disk_read (filesys_disk, sector_idx, buffer + bytes_read); 
+=======
+      if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
+        {
+          /* Read full sector directly into caller's buffer. */
+          block_read (fs_device, sector_idx, buffer + bytes_read);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
         }
       else 
         {
@@ -231,11 +311,19 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
              into caller's buffer. */
           if (bounce == NULL) 
             {
+<<<<<<< HEAD:src/filesys/inode.c
               bounce = malloc (DISK_SECTOR_SIZE);
               if (bounce == NULL)
                 break;
             }
           disk_read (filesys_disk, sector_idx, bounce);
+=======
+              bounce = malloc (BLOCK_SECTOR_SIZE);
+              if (bounce == NULL)
+                break;
+            }
+          block_read (fs_device, sector_idx, bounce);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
           memcpy (buffer + bytes_read, bounce + sector_ofs, chunk_size);
         }
       
@@ -268,12 +356,21 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   while (size > 0) 
     {
       /* Sector to write, starting byte offset within sector. */
+<<<<<<< HEAD:src/filesys/inode.c
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
       off_t inode_left = inode_length (inode) - offset;
       int sector_left = DISK_SECTOR_SIZE - sector_ofs;
+=======
+      block_sector_t sector_idx = byte_to_sector (inode, offset);
+      int sector_ofs = offset % BLOCK_SECTOR_SIZE;
+
+      /* Bytes left in inode, bytes left in sector, lesser of the two. */
+      off_t inode_left = inode_length (inode) - offset;
+      int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
       int min_left = inode_left < sector_left ? inode_left : sector_left;
 
       /* Number of bytes to actually write into this sector. */
@@ -281,17 +378,28 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       if (chunk_size <= 0)
         break;
 
+<<<<<<< HEAD:src/filesys/inode.c
       if (sector_ofs == 0 && chunk_size == DISK_SECTOR_SIZE) 
         {
           /* Write full sector directly to disk. */
           disk_write (filesys_disk, sector_idx, buffer + bytes_written); 
+=======
+      if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
+        {
+          /* Write full sector directly to disk. */
+          block_write (fs_device, sector_idx, buffer + bytes_written);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
         }
       else 
         {
           /* We need a bounce buffer. */
           if (bounce == NULL) 
             {
+<<<<<<< HEAD:src/filesys/inode.c
               bounce = malloc (DISK_SECTOR_SIZE);
+=======
+              bounce = malloc (BLOCK_SECTOR_SIZE);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
               if (bounce == NULL)
                 break;
             }
@@ -300,11 +408,19 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
              we're writing, then we need to read in the sector
              first.  Otherwise we start with a sector of all zeros. */
           if (sector_ofs > 0 || chunk_size < sector_left) 
+<<<<<<< HEAD:src/filesys/inode.c
             disk_read (filesys_disk, sector_idx, bounce);
           else
             memset (bounce, 0, DISK_SECTOR_SIZE);
           memcpy (bounce + sector_ofs, buffer + bytes_written, chunk_size);
           disk_write (filesys_disk, sector_idx, bounce); 
+=======
+            block_read (fs_device, sector_idx, bounce);
+          else
+            memset (bounce, 0, BLOCK_SECTOR_SIZE);
+          memcpy (bounce + sector_ofs, buffer + bytes_written, chunk_size);
+          block_write (fs_device, sector_idx, bounce);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.c
         }
 
       /* Advance. */

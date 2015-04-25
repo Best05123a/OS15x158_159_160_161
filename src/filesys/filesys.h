@@ -8,8 +8,13 @@
 #define FREE_MAP_SECTOR 0       /* Free map file inode sector. */
 #define ROOT_DIR_SECTOR 1       /* Root directory file inode sector. */
 
+<<<<<<< HEAD:src/filesys/filesys.h
 /* Disk used for file system. */
 extern struct disk *filesys_disk;
+=======
+/* Block device that contains the file system. */
+struct block *fs_device;
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/filesys.h
 
 void filesys_init (bool format);
 void filesys_done (void);

@@ -7,7 +7,10 @@
 #include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
+<<<<<<< HEAD:src/filesys/fsutil.c
 #include "devices/disk.h"
+=======
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
 #include "threads/malloc.h"
 #include "threads/palloc.h"
 #include "threads/vaddr.h"
@@ -67,6 +70,7 @@ fsutil_rm (char **argv)
     PANIC ("%s: delete failed\n", file_name);
 }
 
+<<<<<<< HEAD:src/filesys/fsutil.c
 /* Extracts a ustar-format tar archive from the scratch disk, hdc
    or hd1:0, into the Pintos file system. */
 void
@@ -89,6 +93,31 @@ fsutil_extract (char **argv UNUSED)
     PANIC ("couldn't open scratch disk (hdc or hd1:0)");
 
   printf ("Extracting ustar archive from scratch disk into file system...\n");
+=======
+/* Extracts a ustar-format tar archive from the scratch block
+   device into the Pintos file system. */
+void
+fsutil_extract (char **argv UNUSED) 
+{
+  static block_sector_t sector = 0;
+
+  struct block *src;
+  void *header, *data;
+
+  /* Allocate buffers. */
+  header = malloc (BLOCK_SECTOR_SIZE);
+  data = malloc (BLOCK_SECTOR_SIZE);
+  if (header == NULL || data == NULL)
+    PANIC ("couldn't allocate buffers");
+
+  /* Open source block device. */
+  src = block_get_role (BLOCK_SCRATCH);
+  if (src == NULL)
+    PANIC ("couldn't open scratch device");
+
+  printf ("Extracting ustar archive from scratch device "
+          "into file system...\n");
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
 
   for (;;)
     {
@@ -98,7 +127,11 @@ fsutil_extract (char **argv UNUSED)
       int size;
 
       /* Read and parse ustar header. */
+<<<<<<< HEAD:src/filesys/fsutil.c
       disk_read (src, sector++, header);
+=======
+      block_read (src, sector++, header);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
       error = ustar_parse_header (header, &file_name, &type, &size);
       if (error != NULL)
         PANIC ("bad ustar header in sector %"PRDSNu" (%s)", sector - 1, error);
@@ -126,10 +159,17 @@ fsutil_extract (char **argv UNUSED)
           /* Do copy. */
           while (size > 0)
             {
+<<<<<<< HEAD:src/filesys/fsutil.c
               int chunk_size = (size > DISK_SECTOR_SIZE
                                 ? DISK_SECTOR_SIZE
                                 : size);
               disk_read (src, sector++, data);
+=======
+              int chunk_size = (size > BLOCK_SECTOR_SIZE
+                                ? BLOCK_SECTOR_SIZE
+                                : size);
+              block_read (src, sector++, data);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
               if (file_write (dst, data, chunk_size) != chunk_size)
                 PANIC ("%s: write failed with %d bytes unwritten",
                        file_name, size);
@@ -141,6 +181,7 @@ fsutil_extract (char **argv UNUSED)
         }
     }
 
+<<<<<<< HEAD:src/filesys/fsutil.c
   /* Erase the ustar header from the start of the disk, so that
      the extraction operation is idempotent.  We erase two blocks
      because two blocks of zeros are the ustar end-of-archive
@@ -149,27 +190,50 @@ fsutil_extract (char **argv UNUSED)
   memset (header, 0, DISK_SECTOR_SIZE);
   disk_write (src, 0, header);
   disk_write (src, 1, header);
+=======
+  /* Erase the ustar header from the start of the block device,
+     so that the extraction operation is idempotent.  We erase
+     two blocks because two blocks of zeros are the ustar
+     end-of-archive marker. */
+  printf ("Erasing ustar archive...\n");
+  memset (header, 0, BLOCK_SECTOR_SIZE);
+  block_write (src, 0, header);
+  block_write (src, 1, header);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
 
   free (data);
   free (header);
 }
 
 /* Copies file FILE_NAME from the file system to the scratch
+<<<<<<< HEAD:src/filesys/fsutil.c
    disk, in ustar format.
 
    The first call to this function will write starting at the
    beginning of the scratch disk.  Later calls advance across the
    disk.  This position is independent of that used for
+=======
+   device, in ustar format.
+
+   The first call to this function will write starting at the
+   beginning of the scratch device.  Later calls advance across
+   the device.  This position is independent of that used for
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
    fsutil_extract(), so `extract' should precede all
    `append's. */
 void
 fsutil_append (char **argv)
 {
+<<<<<<< HEAD:src/filesys/fsutil.c
   static disk_sector_t sector = 0;
+=======
+  static block_sector_t sector = 0;
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
 
   const char *file_name = argv[1];
   void *buffer;
   struct file *src;
+<<<<<<< HEAD:src/filesys/fsutil.c
   struct disk *dst;
   off_t size;
 
@@ -177,6 +241,15 @@ fsutil_append (char **argv)
 
   /* Allocate buffer. */
   buffer = malloc (DISK_SECTOR_SIZE);
+=======
+  struct block *dst;
+  off_t size;
+
+  printf ("Appending '%s' to ustar archive on scratch device...\n", file_name);
+
+  /* Allocate buffer. */
+  buffer = malloc (BLOCK_SECTOR_SIZE);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
   if (buffer == NULL)
     PANIC ("couldn't allocate buffer");
 
@@ -186,19 +259,31 @@ fsutil_append (char **argv)
     PANIC ("%s: open failed", file_name);
   size = file_length (src);
 
+<<<<<<< HEAD:src/filesys/fsutil.c
   /* Open target disk. */
   dst = disk_get (1, 0);
   if (dst == NULL)
     PANIC ("couldn't open target disk (hdc or hd1:0)");
+=======
+  /* Open target block device. */
+  dst = block_get_role (BLOCK_SCRATCH);
+  if (dst == NULL)
+    PANIC ("couldn't open scratch device");
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
   
   /* Write ustar header to first sector. */
   if (!ustar_make_header (file_name, USTAR_REGULAR, size, buffer))
     PANIC ("%s: name too long for ustar format", file_name);
+<<<<<<< HEAD:src/filesys/fsutil.c
   disk_write (dst, sector++, buffer);
+=======
+  block_write (dst, sector++, buffer);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
 
   /* Do copy. */
   while (size > 0) 
     {
+<<<<<<< HEAD:src/filesys/fsutil.c
       int chunk_size = size > DISK_SECTOR_SIZE ? DISK_SECTOR_SIZE : size;
       if (sector >= disk_size (dst))
         PANIC ("%s: out of space on scratch disk", file_name);
@@ -206,15 +291,30 @@ fsutil_append (char **argv)
         PANIC ("%s: read failed with %"PROTd" bytes unread", file_name, size);
       memset (buffer + chunk_size, 0, DISK_SECTOR_SIZE - chunk_size);
       disk_write (dst, sector++, buffer);
+=======
+      int chunk_size = size > BLOCK_SECTOR_SIZE ? BLOCK_SECTOR_SIZE : size;
+      if (sector >= block_size (dst))
+        PANIC ("%s: out of space on scratch device", file_name);
+      if (file_read (src, buffer, chunk_size) != chunk_size)
+        PANIC ("%s: read failed with %"PROTd" bytes unread", file_name, size);
+      memset (buffer + chunk_size, 0, BLOCK_SECTOR_SIZE - chunk_size);
+      block_write (dst, sector++, buffer);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
       size -= chunk_size;
     }
 
   /* Write ustar end-of-archive marker, which is two consecutive
      sectors full of zeros.  Don't advance our position past
      them, though, in case we have more files to append. */
+<<<<<<< HEAD:src/filesys/fsutil.c
   memset (buffer, 0, DISK_SECTOR_SIZE);
   disk_write (dst, sector, buffer);
   disk_write (dst, sector, buffer + 1);
+=======
+  memset (buffer, 0, BLOCK_SECTOR_SIZE);
+  block_write (dst, sector, buffer);
+  block_write (dst, sector, buffer + 1);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/fsutil.c
 
   /* Finish up. */
   file_close (src);

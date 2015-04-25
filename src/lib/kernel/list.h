@@ -109,6 +109,22 @@ struct list
         ((STRUCT *) ((uint8_t *) &(LIST_ELEM)->next     \
                      - offsetof (STRUCT, MEMBER.next)))
 
+<<<<<<< HEAD:src/lib/kernel/list.h
+=======
+/* List initialization.
+
+   A list may be initialized by calling list_init():
+
+       struct list my_list;
+       list_init (&my_list);
+
+   or with an initializer using LIST_INITIALIZER:
+
+       struct list my_list = LIST_INITIALIZER (my_list); */
+#define LIST_INITIALIZER(NAME) { { NULL, &(NAME).tail }, \
+                                 { &(NAME).head, NULL } }
+
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/lib/kernel/list.h
 void list_init (struct list *);
 
 /* List traversal. */

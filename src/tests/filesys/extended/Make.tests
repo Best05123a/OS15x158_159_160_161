@@ -20,7 +20,11 @@ $(foreach prog,$(tests/filesys/extended_TESTS),		\
 	$(eval $(prog)_PUTFILES += tests/filesys/extended/tar))
 # The version of GNU make 3.80 on vine barfs if this is split at
 # the last comma.
+<<<<<<< HEAD:src/tests/filesys/extended/Make.tests
 $(foreach test,$(tests/filesys/extended_TESTS),$(eval $(test).output: FSDISK = tmp.dsk))
+=======
+$(foreach test,$(tests/filesys/extended_TESTS),$(eval $(test).output: FILESYSSOURCE = --disk=tmp.dsk))
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/tests/filesys/extended/Make.tests
 
 tests/filesys/extended/dir-mk-tree_SRC += tests/filesys/extended/mk-tree.c
 tests/filesys/extended/dir-rm-tree_SRC += tests/filesys/extended/mk-tree.c
@@ -34,10 +38,17 @@ GETTIMEOUT = 60
 GETCMD = pintos -v -k -T $(GETTIMEOUT)
 GETCMD += $(PINTOSOPTS)
 GETCMD += $(SIMULATOR)
+<<<<<<< HEAD:src/tests/filesys/extended/Make.tests
 GETCMD += --fs-disk=$(FSDISK)
 GETCMD += -g fs.tar -a $(TEST).tar
 ifeq ($(filter vm, $(KERNEL_SUBDIRS)), vm)
 GETCMD += --swap-disk=4
+=======
+GETCMD += $(FILESYSSOURCE)
+GETCMD += -g fs.tar -a $(TEST).tar
+ifeq ($(filter vm, $(KERNEL_SUBDIRS)), vm)
+GETCMD += --swap-size=4
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/tests/filesys/extended/Make.tests
 endif
 GETCMD += -- -q
 GETCMD += $(KERNELFLAGS)
@@ -45,9 +56,15 @@ GETCMD += run 'tar fs.tar /'
 GETCMD += < /dev/null
 GETCMD += 2> $(TEST)-persistence.errors $(if $(VERBOSE),|tee,>) $(TEST)-persistence.output
 
+<<<<<<< HEAD:src/tests/filesys/extended/Make.tests
 tests/filesys/extended/%.output: os.dsk
 	rm -f tmp.dsk
 	pintos-mkdisk tmp.dsk 2
+=======
+tests/filesys/extended/%.output: kernel.bin
+	rm -f tmp.dsk
+	pintos-mkdisk tmp.dsk --filesys-size=2
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/tests/filesys/extended/Make.tests
 	$(TESTCMD)
 	$(GETCMD)
 	rm -f tmp.dsk

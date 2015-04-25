@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+<<<<<<< HEAD:src/devices/vga.c
+=======
+#include "devices/speaker.h"
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/vga.c
 #include "threads/io.h"
 #include "threads/interrupt.h"
 #include "threads/vaddr.h"
@@ -80,6 +84,15 @@ vga_putc (int c)
       if (cx >= COL_CNT)
         newline ();
       break;
+<<<<<<< HEAD:src/devices/vga.c
+=======
+
+    case '\a':
+      intr_set_level (old_level);
+      speaker_beep ();
+      intr_disable ();
+      break;
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/vga.c
       
     default:
       fb[cy][cx][0] = c;

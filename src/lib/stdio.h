@@ -25,6 +25,10 @@ int puts (const char *);
 
 /* Nonstandard functions. */
 void hex_dump (uintptr_t ofs, const void *, size_t size, bool ascii);
+<<<<<<< HEAD:src/lib/stdio.h
+=======
+void print_human_readable_size (uint64_t sz);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/lib/stdio.h
 
 /* Internal functions. */
 void __vprintf (const char *format, va_list args,

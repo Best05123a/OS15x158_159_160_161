@@ -3,15 +3,26 @@
 
 #include <stdbool.h>
 #include "filesys/off_t.h"
+<<<<<<< HEAD:src/filesys/inode.h
 #include "devices/disk.h"
+=======
+#include "devices/block.h"
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.h
 
 struct bitmap;
 
 void inode_init (void);
+<<<<<<< HEAD:src/filesys/inode.h
 bool inode_create (disk_sector_t, off_t);
 struct inode *inode_open (disk_sector_t);
 struct inode *inode_reopen (struct inode *);
 disk_sector_t inode_get_inumber (const struct inode *);
+=======
+bool inode_create (block_sector_t, off_t);
+struct inode *inode_open (block_sector_t);
+struct inode *inode_reopen (struct inode *);
+block_sector_t inode_get_inumber (const struct inode *);
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/inode.h
 void inode_close (struct inode *);
 void inode_remove (struct inode *);
 off_t inode_read_at (struct inode *, void *, off_t size, off_t offset);

@@ -4,7 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 #include "devices/input.h"
+<<<<<<< HEAD:src/devices/kbd.c
 #include "threads/init.h"
+=======
+#include "devices/shutdown.h"
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/kbd.c
 #include "threads/interrupt.h"
 #include "threads/io.h"
 
@@ -135,7 +139,11 @@ keyboard_interrupt (struct intr_frame *args UNUSED)
         {
           /* Reboot if Ctrl+Alt+Del pressed. */
           if (c == 0177 && ctrl && alt)
+<<<<<<< HEAD:src/devices/kbd.c
             reboot ();
+=======
+            shutdown_reboot ();
+>>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/kbd.c
 
           /* Handle Ctrl, Shift.
              Note that Ctrl overrides Shift. */
