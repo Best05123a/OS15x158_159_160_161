@@ -55,7 +55,6 @@ TESTCMD = pintos -v -k -T $(TIMEOUT)
 TESTCMD += $(SIMULATOR)
 TESTCMD += $(PINTOSOPTS)
 ifeq ($(filter userprog, $(KERNEL_SUBDIRS)), userprog)
-<<<<<<< HEAD:src/tests/Make.tests
 TESTCMD += --fs-disk=$(FSDISK)
 TESTCMD += $(foreach file,$(PUTFILES),-p $(file) -a $(notdir $(file)))
 endif
@@ -63,15 +62,6 @@ ifeq ($(filter vm, $(KERNEL_SUBDIRS)), vm)
 TESTCMD += --swap-disk=4
 endif
 TESTCMD += -- -q 
-=======
-TESTCMD += $(FILESYSSOURCE)
-TESTCMD += $(foreach file,$(PUTFILES),-p $(file) -a $(notdir $(file)))
-endif
-ifeq ($(filter vm, $(KERNEL_SUBDIRS)), vm)
-TESTCMD += --swap-size=4
-endif
-TESTCMD += -- -q
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/tests/Make.tests
 TESTCMD += $(KERNELFLAGS)
 ifeq ($(filter userprog, $(KERNEL_SUBDIRS)), userprog)
 TESTCMD += -f
@@ -79,11 +69,7 @@ endif
 TESTCMD += $(if $($(TEST)_ARGS),run '$(*F) $($(TEST)_ARGS)',run $(*F))
 TESTCMD += < /dev/null
 TESTCMD += 2> $(TEST).errors $(if $(VERBOSE),|tee,>) $(TEST).output
-<<<<<<< HEAD:src/tests/Make.tests
 %.output: os.dsk
-=======
-%.output: kernel.bin loader.bin
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/tests/Make.tests
 	$(TESTCMD)
 
 %.result: %.ck %.output

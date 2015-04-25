@@ -635,24 +635,3 @@ hex_dump (uintptr_t ofs, const void *buf_, size_t size, bool ascii)
       size -= n;
     }
 }
-<<<<<<< HEAD:src/lib/stdio.c
-=======
-
-/* Prints SIZE, which represents a number of bytes, in a
-   human-readable format, e.g. "256 kB". */
-void
-print_human_readable_size (uint64_t size) 
-{
-  if (size == 1)
-    printf ("1 byte");
-  else 
-    {
-      static const char *factors[] = {"bytes", "kB", "MB", "GB", "TB", NULL};
-      const char **fp;
-
-      for (fp = factors; size >= 1024 && fp[1] != NULL; fp++)
-        size /= 1024;
-      printf ("%"PRIu64" %s", size, *fp);
-    }
-}
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/lib/stdio.c

@@ -37,30 +37,17 @@ static bool use_console_lock;
 
    lock_console()
    vprintf()
-<<<<<<< HEAD:src/lib/kernel/console.c
    printf()             - palloc() tries to grab the lock again
    palloc_free()        
    schedule_tail()      - another thread dying as we switch threads
    schedule()
    thread_yield()
    intr_handler()       - timer interrupt
-=======
-   printf()               - palloc() tries to grab the lock again
-   palloc_free()        
-   thread_schedule_tail() - another thread dying as we switch threads
-   schedule()
-   thread_yield()
-   intr_handler()         - timer interrupt
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/lib/kernel/console.c
    intr_set_level()
    serial_putc()
    putchar_have_lock()
    putbuf()
-<<<<<<< HEAD:src/lib/kernel/console.c
    sys_write()          - one process writing to the console
-=======
-   sys_write()            - one process writing to the console
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/lib/kernel/console.c
    syscall_handler()
    intr_handler()
 

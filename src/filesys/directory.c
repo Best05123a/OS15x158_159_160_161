@@ -16,11 +16,7 @@ struct dir
 /* A single directory entry. */
 struct dir_entry 
   {
-<<<<<<< HEAD:src/filesys/directory.c
     disk_sector_t inode_sector;         /* Sector number of header. */
-=======
-    block_sector_t inode_sector;        /* Sector number of header. */
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/directory.c
     char name[NAME_MAX + 1];            /* Null terminated file name. */
     bool in_use;                        /* In use or free? */
   };
@@ -28,11 +24,7 @@ struct dir_entry
 /* Creates a directory with space for ENTRY_CNT entries in the
    given SECTOR.  Returns true if successful, false on failure. */
 bool
-<<<<<<< HEAD:src/filesys/directory.c
 dir_create (disk_sector_t sector, size_t entry_cnt) 
-=======
-dir_create (block_sector_t sector, size_t entry_cnt)
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/directory.c
 {
   return inode_create (sector, entry_cnt * sizeof (struct dir_entry));
 }
@@ -147,20 +139,12 @@ dir_lookup (const struct dir *dir, const char *name,
    Fails if NAME is invalid (i.e. too long) or a disk or memory
    error occurs. */
 bool
-<<<<<<< HEAD:src/filesys/directory.c
 dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector) 
-=======
-dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/directory.c
 {
   struct dir_entry e;
   off_t ofs;
   bool success = false;
-<<<<<<< HEAD:src/filesys/directory.c
   
-=======
-
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/filesys/directory.c
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
 

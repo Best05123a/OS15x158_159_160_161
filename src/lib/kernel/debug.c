@@ -11,10 +11,6 @@
 #include "threads/switch.h"
 #include "threads/vaddr.h"
 #include "devices/serial.h"
-<<<<<<< HEAD:src/lib/kernel/debug.c
-=======
-#include "devices/shutdown.h"
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/lib/kernel/debug.c
 
 /* Halts the OS, printing the source file name, line number, and
    function name, plus a user-specific message. */
@@ -49,12 +45,8 @@ debug_panic (const char *file, int line, const char *function,
     }
 
   serial_flush ();
-<<<<<<< HEAD:src/lib/kernel/debug.c
   if (power_off_when_done)
     power_off ();
-=======
-  shutdown ();
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/lib/kernel/debug.c
   for (;;);
 }
 

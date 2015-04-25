@@ -1,12 +1,7 @@
 # -*- makefile -*-
 
-<<<<<<< HEAD:src/tests/userprog/Make.tests
 tests/%.output: FSDISK = 2
 tests/%.output: PUTFILES = $(filter-out os.dsk, $^)
-=======
-tests/%.output: FILESYSSOURCE = --filesys-size=2
-tests/%.output: PUTFILES = $(filter-out kernel.bin loader.bin, $^)
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/tests/userprog/Make.tests
 
 tests/userprog_TESTS = $(addprefix tests/userprog/,args-none		\
 args-single args-multiple args-many args-dbl-space sc-bad-sp		\
