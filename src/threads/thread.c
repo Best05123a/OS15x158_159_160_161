@@ -205,7 +205,7 @@ thread_create (const char *name, int priority,
   sf->ebp = 0;
 
   intr_set_level (old_level);
-
+  t->block_ticks = 0;
   /* Add to run queue. */
   thread_unblock (t);
 
@@ -245,7 +245,8 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  //list_push_back (&ready_list, &t->elem);
+  list_insert_ordered(&ready_list,&t->elem,compare,NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -316,7 +317,8 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+      list_insert_ordered(&ready_list,&cur->elem,compare,NULL);
+      //list_push_back (&ready_list, &cur->elem);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -353,6 +355,11 @@ thread_get_priority (void)
   return thread_current ()->priority;
 }
 
+static bool compare(const struct list_elem *a,const struct list_elem *b,void *aux)
+{
+    return(list_entry(a,struct thread,elem)->priority >
+           list_entry(b,struct thread,elem)->priority);
+}
 /* Sets the current thread's nice value to NICE. */
 void
 thread_set_nice (int nice UNUSED) 
@@ -375,7 +382,17 @@ thread_get_load_avg (void)
   /* Not yet implemented. */
   return 0;
 }
-
+/* Check if the block_ticks is zero */ 
+void checkTicks(struct thread *t,void *aux UNUSED)
+{
+    if(t->status == THREAD_BLOCKED &&t->block_ticks >0)
+    {
+	t->block_ticks--;
+	if(t->block_ticks == 0){
+	    thread_unblock(t);
+	}
+    }
+}
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) 
@@ -469,7 +486,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  list_push_back (&all_list, &t->allelem);
+  //list_push_back (&all_list, &t->allelem);
+  list_insert_ordered(&all_list,&t->allelem,compare,NULL);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
