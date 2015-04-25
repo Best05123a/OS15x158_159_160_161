@@ -92,8 +92,7 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-
-      int block_ticks;     /* Record the block time */
+      int block_ticks;                 /* time of being blocked */
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -133,10 +132,10 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
-
+static bool compare(const struct list_elem *,const struct list_elem *,void *);
 int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
-
+void checkTicks(struct thread *t,void *aux UNUSED);
 #endif /* threads/thread.h */
