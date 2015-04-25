@@ -3,24 +3,13 @@
 #include <inttypes.h>
 #include <round.h>
 #include <stdio.h>
-<<<<<<< HEAD:src/devices/timer.c
 #include "threads/interrupt.h"
 #include "threads/io.h"
-=======
-#include "devices/pit.h"
-#include "threads/interrupt.h"
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
 #include "threads/synch.h"
 #include "threads/thread.h"
   
 /* See [8254] for hardware details of the 8254 timer chip. */
 
-<<<<<<< HEAD:src/devices/timer.c
-=======
-// Used for BSD scheduler
-#define RECALC_FREQ 4
-
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
 #if TIMER_FREQ < 19
 #error 8254 timer requires TIMER_FREQ >= 19
 #endif
@@ -28,12 +17,6 @@
 #error TIMER_FREQ <= 1000 recommended
 #endif
 
-<<<<<<< HEAD:src/devices/timer.c
-=======
-/* List of processes sleeping */
-static struct list sleep_list;
-
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
 
@@ -46,10 +29,6 @@ static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
 static void real_time_delay (int64_t num, int32_t denom);
-
-<<<<<<< HEAD:src/devices/timer.c
-/* Add by our own */
-static void check_block(struct thread *t,void *aux UNUSED);
 
 /* Sets up the 8254 Programmable Interval Timer (PIT) to
    interrupt PIT_FREQ times per second, and registers the
@@ -66,16 +45,6 @@ timer_init (void)
   outb (0x40, count >> 8);
 
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
-=======
-/* Sets up the timer to interrupt TIMER_FREQ times per second,
-   and registers the corresponding interrupt. */
-void
-timer_init (void) 
-{
-  pit_configure_channel (0, 2, TIMER_FREQ);
-  intr_register_ext (0x20, timer_interrupt, "8254 Timer");
-  list_init(&sleep_list);
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -112,10 +81,7 @@ timer_ticks (void)
   enum intr_level old_level = intr_disable ();
   int64_t t = ticks;
   intr_set_level (old_level);
-<<<<<<< HEAD:src/devices/timer.c
   barrier ();
-=======
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
   return t;
 }
 
@@ -130,55 +96,21 @@ timer_elapsed (int64_t then)
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
-<<<<<<< HEAD:src/devices/timer.c
 timer_sleep (int64_t ticks) 
 {
-    /* int64_t start = timer_ticks ();
+/*  int64_t start = timer_ticks ();
 
   ASSERT (intr_get_level () == INTR_ON);
   while (timer_elapsed (start) < ticks) 
   thread_yield ();*/
-ASSERT (intr_get_level () == INTR_ON);
-enum intr_level old_level;
-struct thread *t;  
- t=thread_current (); 
- t->block_ticks = ticks; //set waiting time
- old_level = intr_disable();
- thread_block();
- intr_set_level(old_level);
-  
-}
-
-/* Check if the block tick is 0 */
-void check_block(struct thread *t,void *aux UNUSED)
-{
-    if(t->status == THREAD_BLOCKED && t->block_ticks > 0)
-    {
-	t->block_ticks--;
-	if(t->block_ticks == 0)
-	{
-	    thread_unblock(t);
-	}
+    if(ticks <= 0){
+	return;
     }
-=======
-timer_sleep (int64_t ticks)
-{
-  ASSERT (intr_get_level () == INTR_ON);
-  if (ticks <= 0)
-    {
-      return;
-    }
-  /* Turn interrupts off temporarily to:
-     - calculate ticks to stop sleep
-     - add thread to sleep list
-     - block thread */
-  enum intr_level old_level = intr_disable ();
-  thread_current()->ticks = timer_ticks() + ticks;
-  list_insert_ordered(&sleep_list, &thread_current()->elem,
-		      (list_less_func *) &cmp_ticks, NULL);
-  thread_block();
-  intr_set_level(old_level);
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
+    enum intr_level old_level = intr_disable();
+    struct thread *current_thread = thread_current();
+    current_thread->block_ticks = ticks;
+    thread_block();
+    intr_set_level(old_level);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -250,55 +182,16 @@ timer_print_stats (void)
 {
   printf ("Timer: %"PRId64" ticks\n", timer_ticks ());
 }
-<<<<<<< HEAD:src/devices/timer.c
-=======
-
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
 
 /* Timer interrupt handler. */
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
-<<<<<<< HEAD:src/devices/timer.c
-    enum intr_level old_level;
-    old_level = intr_disable();
-
   ticks++;
-    thread_foreach(check_block,0);
-    intr_set_level(old_level);
+  enum intr_level old_level = intr_disable();
+  thread_foreach(checkTicks,NULL);
+  intr_set_level(old_level);
   thread_tick ();
-=======
-  ticks++;
-  thread_tick ();
-
-  if (thread_mlfqs)
-    {
-      mlfqs_increment();
-      if (ticks % TIMER_FREQ == 0)
-	{
-	  mlfqs_load_avg();
-	  mlfqs_recalc(); // Recalcs recent_cpu and priority
-	}
-      if (ticks % RECALC_FREQ == 0)
-	{
-	  mlfqs_priority(thread_current());
-	}
-    }
-
-  struct list_elem *e = list_begin(&sleep_list);
-  while (e != list_end(&sleep_list))
-    {
-      struct thread *t = list_entry(e, struct thread, elem);      
-      if (ticks < t->ticks)
-	{
-	  break;
-	}
-      list_remove(e); // remove from sleep list
-      thread_unblock(t); // Unblock and add to ready list
-      e = list_begin(&sleep_list);
-    }
-  test_max_priority(); // Tests if thread still has max priority
->>>>>>> fbc51e42e63d1e953a126d05260e7d06f75ecc2a:src/devices/timer.c
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
