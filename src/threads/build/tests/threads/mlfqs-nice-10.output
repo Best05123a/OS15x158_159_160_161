@@ -1,4 +1,4 @@
-Writing command line to /tmp/B1J5Df1zVy.dsk...
+Writing command line to /tmp/pxn3VoVx3z.dsk...
 squish-pty bochs -q
 Kernel command line: -q -mlfqs run mlfqs-nice-10
 Pintos booting with 4,096 kB RAM...
@@ -11,20 +11,20 @@ Executing 'mlfqs-nice-10':
 (mlfqs-nice-10) Starting 10 threads...
 (mlfqs-nice-10) Starting threads took 28 ticks.
 (mlfqs-nice-10) Sleeping 40 seconds to let threads run, please wait...
-(mlfqs-nice-10) Thread 0 received 301 ticks.
+(mlfqs-nice-10) Thread 0 received 300 ticks.
 (mlfqs-nice-10) Thread 1 received 301 ticks.
-(mlfqs-nice-10) Thread 2 received 300 ticks.
-(mlfqs-nice-10) Thread 3 received 300 ticks.
+(mlfqs-nice-10) Thread 2 received 301 ticks.
+(mlfqs-nice-10) Thread 3 received 301 ticks.
 (mlfqs-nice-10) Thread 4 received 301 ticks.
 (mlfqs-nice-10) Thread 5 received 301 ticks.
 (mlfqs-nice-10) Thread 6 received 301 ticks.
 (mlfqs-nice-10) Thread 7 received 300 ticks.
-(mlfqs-nice-10) Thread 8 received 300 ticks.
-(mlfqs-nice-10) Thread 9 received 301 ticks.
+(mlfqs-nice-10) Thread 8 received 301 ticks.
+(mlfqs-nice-10) Thread 9 received 300 ticks.
 (mlfqs-nice-10) end
 Execution of 'mlfqs-nice-10' complete.
 Timer: 4152 ticks
-Thread: 0 idle ticks, 4155 kernel ticks, 0 user ticks
-Console: 997 characters output
+Thread: 991 idle ticks, 3164 kernel ticks, 0 user ticks
+Console: 999 characters output
 Keyboard: 0 keys pressed
 Powering off...
