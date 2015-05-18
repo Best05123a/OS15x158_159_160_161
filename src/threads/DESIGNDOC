@@ -1,0 +1,237 @@
+			+--------------------+
+			| PROJECT 1: THREADS |
+			|   DESIGN DOCUMENT  |
+			+--------------------+
+				   
+---- GROUP ----
+
+Chen Hu <10132510158@ecnu.cn>
+Jiajun Shi <10132510159@ecnu.cn>
+Yi Feng <10132510160@ecnu.cn>
+Shuaifeng Pang <10132510161@ecnu.cn>
+
+			     ALARM CLOCK
+			     ===========
+
+---- DATA STRUCTURES ----
+
+>> A1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+
+- In thread.h, added variable to thread struct:
+
+  int block_ticks;     /* Record the block time */
+
+If a thread is sleeping, ticks indicate the tick value when the thread is
+done sleeping and ready to be unblocked.
+
+---- ALGORITHMS ----
+
+>> A2: Briefly describe what happens in a call to timer_sleep(),
+>> including the effects of the timer interrupt handler.
+
+In timer_sleep:
+1) Check for valid ticks argument (i.e. ticks > 0).
+2) Disable interrupts.
+3) Calculate the tick value for the thread as described above. This is
+calculated by adding the global ticks (ticks since the OS booted) to the
+ticks argument.
+4) Block the thread
+5) Reset interrupts level to its old one.
+
+In the timer interrupt handler:
+1) Variable ticks is added by one;
+2) Disable interrupts.
+3) Call function checkTicks for every sleeping thread.
+4) Reset interrupts level to its old one.
+
+>> A3: What steps are taken to minimize the amount of time spent in
+>> the timer interrupt handler?
+
+Note that by keeping the sleep list in sorted order, this minimizes the
+time in the interrupt handler. Thus, the handler does not have to iterate
+through the entire sleep list at every interrupt.
+
+---- SYNCHRONIZATION ----
+
+>> A4: How are race conditions avoided when multiple threads call
+>> timer_sleep() simultaneously?
+
+Interrupts are tunred off when the blocking of a thread occurs, 
+not allowing another thread to attempt to be put to sleep at the 
+same time.
+
+>> A5: How are race conditions avoided when a timer interrupt occurs
+>> during a call to timer_sleep()?
+
+When a call to thread_block is made, interrupts are turned off. This prevents
+a race condition from a timer interrupt.
+
+---- RATIONALE ----
+
+>> A6: Why did you choose this design?  In what ways is it superior to
+>> another design you considered?
+
+To check the block_tick for each thread every tick is a good way to avoid 
+busy_waiting.
+
+Also thread_block was used because it performed the functionality of 
+taking a thread off of the ready list and yielding to the next scheduled thread.
+
+
+			 PRIORITY SCHEDULING
+			 ===================
+
+---- DATA STRUCTURES ----
+
+>> B1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+In thread.h, the following variables are added to the thread struct:
+
+   int origin_priority;
+   - The baseline (non-donated) priority of the thread
+
+   struct lock *wait_on_lock;
+   - The lock the thread is waiting on (NULL if not waiting on any lock)
+
+   struct list locks;   
+   - Locks that the thread is holding
+
+In synch.h, the following variables are added to the lock struct:
+
+   int max_priority; 
+   - Max priority among the threads acquiring the lock
+
+   struct list_elem elem;
+   - List element for priority donation
+
+>> B2: Explain the data structure used to track priority donation.
+>> Use ASCII art to diagram a nested donation.  (Alternately, submit a
+>> .png file.)
+
+A, B, C are locks
+H1, H2, M, L are threads
+
+    A
+H1 --->    C
+H2 ---> M ---> L
+    B
+
+M's donation list: H1, H2
+L's donation list: M
+
+M's wait on lock: C
+'L's wait on lock: NULL
+
+M's current donated priority is max(H1, H2, M).
+L's current donated priority is max(L, M).
+
+---- ALGORITHMS ----
+
+>> B3: How do you ensure that the highest priority thread waiting for
+>> a lock, semaphore, or condition variable wakes up first?
+
+In a semaphore, the list of waiters denotes the threads waiting for the
+semaphore to be upped. Thus, waiters are inserted such that the front
+thread has the highest priority. Note that this waiters list is also
+sorted after the semaphore is released.For a condition variable, the 
+same thing happens with the list of semaphore elements, we find the 
+semaphore element that has the thread with the highest priority waiting
+on it.
+
+>> B4: Describe the sequence of events when a call to lock_acquire()
+>> causes a priority donation.  How is nested donation handled?
+
+1) The current thread updates its wait on lock variable to the current
+lock.
+2) The current thread adds itself to the lock holder's donations list.
+3) Priority is donated iteratively via the following process (written
+   in pseudocode):
+
+   - thread = current thread
+   - lock = lock current thread is waiting on
+   while (lock exists)
+   {
+     - if there is no holder for lock, return
+     - if the lock holder has a bigger (or equal) priority than thread's
+       priority, return
+     - Set the lock holder's priority = thread's priority
+     - Update thread = lock holder
+     - Update lock = lock thread is waiting on
+   }
+   Note that this iteration has a depth of 8 in order to prevent infinite
+   loops due to deadlocking threads.
+
+>> B5: Describe the sequence of events when lock_release() is called
+>> on a lock that a higher-priority thread is waiting for.
+
+1) The lock holder is updated to NULL.
+2) Removes the thread's waiting on the just-released lock off the current
+thread's donation list. Simply, the priority donation is gone once the
+lock is released.
+3) Refresh the current thread's priority. This means finding the highest
+priority thread on the donation list.
+4) The highest waiting priority thread acquires the lock and is put on the
+ready queue.
+5) Check if the current thread still has max priority. If not, yield the
+processor.
+
+---- SYNCHRONIZATION ----
+
+>> B6: Describe a potential race in thread_set_priority() and explain
+>> how your implementation avoids it.  Can you use a lock to avoid
+>> this race?
+
+During priority donation, the lock holder’s priority may be set by it’s donor,
+at the mean time, the thread itself may want to change the priority.
+If the donor and the thread itself set the priority in a different order, may 
+cause a different result.
+
+
+Interrupts are turned off in thread_set_priority(). This is because we
+have to read / write to the current thread's priority, which is updated
+every 4 ticks in the interrupt handler. Because of this, we cannot use
+locks since the interrupt handler cannot acquire locks.
+
+
+---- RATIONALE ----
+
+>> B7: Why did you choose this design?  In what ways is it superior to
+>> another design you considered?
+
+It performs a check to see if any priority donation needs to occur on each call
+to next_thread_to_run(). This ensures that priority donation happens immediately
+and will have already occured whenever it is necessary. 
+
+A previous design that we considered always found the highest priority thread,
+regardless of if that thread was blocked or not. If that highest priority thread
+was blocked, then priority donation happened then. The problem with this design was
+that it would not work if the highest priority thread was waiting on a semaphore and 
+not a lock. The final design helps prevent this issue. 
+
+
+
+			   SURVEY QUESTIONS
+			   ================
+
+>> In your opinion, was this assignment, or any one of the three problems
+>> in it, too easy or too hard?  Did it take too long or too little time?
+
+
+>> Did you find that working on a particular part of the assignment gave
+>> you greater insight into some aspect of OS design?
+
+
+>> Is there some particular fact or hint we should give students in
+>> future quarters to help them solve the problems?  Conversely, did you
+>> find any of our guidance to be misleading?
+
+
+>> Do you have any suggestions for the TAs to more effectively assist
+>> students, either for future quarters or the remaining projects?
+
+>> Any other comments?
